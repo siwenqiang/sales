@@ -44,7 +44,11 @@
                           <el-menu-item :index="leaderDayAttendance">日考勤</el-menu-item>
                           <el-menu-item :index="leaderMonthAttendance">月考勤</el-menu-item>
                         </el-submenu>
-                        <el-menu-item index="2-2">选项2</el-menu-item>
+                        <el-submenu index="2-1" v-if="this.$store.state.flag===1">
+                          <template slot="title" >客户管理</template>
+                          <el-menu-item :index="leaderClientFollow_up">客户跟进</el-menu-item>
+                          <el-menu-item :index="LeaderClientFixed">客户维护</el-menu-item>
+                        </el-submenu>
                         <el-menu-item index="2-3">选项3</el-menu-item>
                     </el-submenu>
                     <!-- 通讯录 -->
@@ -140,6 +144,8 @@ export default {
       staffAttendance:'/staffAttendance',
       leaderDayAttendance:'/leaderDayAttendance',
       leaderMonthAttendance:'/leaderMonthAttendance',
+      leaderClientFollow_up:'leaderClientFollow_up',
+      LeaderClientFixed:'LeaderClientFixed',
       dialogVisible:true,
       formData:{
         teamId:''

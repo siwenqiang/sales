@@ -24,6 +24,8 @@ import ModifyPassword from '@/components/modifyPassword'
 import StaffAttendance from '@/components/staff/staffAttendance'
 import LeaderDayAttendance from '@/components/leader/leaderDayAttendance'
 import LeaderMonthAttendance from '@/components/leader/leaderMonthAttendance'
+import LeaderClientFollow_up from '@/components/leader/leaderClientFollow_up'
+import LeaderClientFixed from '@/components/leader/LeaderClientFixed'
 import store from '../main.js'
 
 Vue.use(Router)
@@ -132,6 +134,14 @@ const router = new Router({
       {
         path:'/leaderMonthAttendance',
         component:LeaderMonthAttendance
+      },
+      {
+        path:'/leaderClientFollow_up',
+        component:LeaderClientFollow_up
+      },
+      {
+        path:'/leaderClientFixed',
+        component:LeaderClientFixed
       }
     ]
   }

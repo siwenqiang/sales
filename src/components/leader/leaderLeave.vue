@@ -73,8 +73,8 @@
             <el-table-column
               label="操作">
             <template slot-scope="list">
-            <el-button type="success" size="small" @click="pass(list.row)">通过</el-button>
-            <el-button type="danger" size="small" @click="nopass(list.row)">不通过</el-button>
+            <el-button type="success" size="small" @click="pass(list.row)" v-if="list.row.status===0">通过</el-button>
+            <el-button type="danger" size="small" @click="nopass(list.row)" v-if="list.row.status===0">不通过</el-button>
             </template>
             </el-table-column>
 
