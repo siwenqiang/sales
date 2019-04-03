@@ -47,7 +47,12 @@
                         <el-submenu index="2-1" v-if="this.$store.state.flag===1">
                           <template slot="title" >客户管理</template>
                           <el-menu-item :index="leaderClientFollow_up">客户跟进</el-menu-item>
-                          <el-menu-item :index="LeaderClientFixed">客户维护</el-menu-item>
+                          <el-menu-item :index="leaderClientFixed">客户维护</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="2-2" v-if="this.$store.state.flag===2">
+                          <template slot="title" >客户管理</template>
+                          <el-menu-item :index="staffClientFollow_up">客户跟进</el-menu-item>
+                          <el-menu-item :index="staffClientFixed">客户维护</el-menu-item>
                         </el-submenu>
                         <el-menu-item index="2-3">选项3</el-menu-item>
                     </el-submenu>
@@ -145,7 +150,9 @@ export default {
       leaderDayAttendance:'/leaderDayAttendance',
       leaderMonthAttendance:'/leaderMonthAttendance',
       leaderClientFollow_up:'leaderClientFollow_up',
-      LeaderClientFixed:'LeaderClientFixed',
+      leaderClientFixed:'leaderClientFixed',
+      staffClientFollow_up:'staffClientFollow_up',
+      staffClientFixed:'staffClientFixed',
       dialogVisible:true,
       formData:{
         teamId:''

@@ -177,7 +177,9 @@ export default {
         },
         //上传成功时的回调
         handlePicture(response,file,fileList){
-           var This = this;
+          console.log(file)
+          console.log(file.raw)
+          var This = this;
         //this.imageUrl = URL.createObjectURL(file.raw);
         var reader = new FileReader();
         reader.readAsDataURL(file.raw);
@@ -194,9 +196,9 @@ export default {
             form.appendChild(input);   
         }
         // $('.img1').val(This.imageUrl)
-          console.log(response)
-          console.log(file)
-          console.log(fileList)
+          // console.log(response)
+          // console.log(file)
+          // console.log(fileList)
           
         },
         //实现图片的预览功能
