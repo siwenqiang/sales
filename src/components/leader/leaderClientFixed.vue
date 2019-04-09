@@ -3,10 +3,9 @@
         <my-bread level1="客户管理" level2="客户维护"></my-bread>
         <el-form id="first_form" v-model="form">
             <el-form-item label="选择员工" prop="staffList" style="margin-top:20px;display:inline-block;" id="staff">
-                <el-select v-model="form.staffList" placeholder="请选择你要查看的员工">
-                  <el-option label="张三" value="shanghai"></el-option>
-                  <el-option label="李四" value="beijing"></el-option>
-                </el-select>
+              <el-select v-model="use_id" placeholder="请选择你要查看的员工" @change="searchStaffClient">
+                <el-option v-for="(v,i) in form.staffList" :key="i" :label="v.realname" :value="v.id"></el-option>
+              </el-select>
             </el-form-item>
         </el-form>
         <el-table
@@ -21,12 +20,12 @@
               width="55">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="cust_name"
               label="客户名字">
             </el-table-column>
             <el-table-column
-              prop="person"
-              label="跟进人员">
+              prop="mobile"
+              label="联系方式">
             </el-table-column>
         </el-table>
         <div style="margin-top: 20px">
@@ -39,12 +38,12 @@
           title="更改跟进人员名单"
           :visible.sync="dialogVisibleClientInfo"
           size="tiny">
-                <el-radio-group v-model="value">
-                  <el-radio v-for="v in clientInfo" :key="v" :label="v"></el-radio>
-                </el-radio-group>
+          <el-radio-group v-model="value">
+            <el-radio v-for="v in clientInfo" :key="v.id" :label="v.realname" @change="staff_id(v.id)"></el-radio>
+          </el-radio-group>
           <span slot="footer" class="dialog-footer">
             <el-button @click="dialogVisibleClientInfo = false">取 消</el-button>
-            <el-button type="primary" @click="dialogVisibleClientInfo = false">确 定</el-button>
+            <el-button type="primary" @click="changeClientFollow">确 定</el-button>
           </span>
         </el-dialog>
     </el-card>
@@ -52,40 +51,96 @@
 
 <script>
 export default {
+    inject:['reload'],
     data(){
         return{
+            sub_use_id:'',
+            client_id:[],
+            use_id:'',
             value:'',
-            clientInfo:['张三','李四','王五','马六'],
+            clientInfo:[],
             dialogVisibleClientInfo:false,
             form:{
                 staffList:[],
             },
-            tableData3: [{
-              person: '张三',
-              name: '王小虎',
-            }, {
-              person: '李四',
-              name: '王二虎',
-            }, {
-              person: '王五',
-              name: '王三虎',
-            }, {
-              person: '马六',
-              name: '王四虎',
-            }, {
-              person: '张三',
-              name: '王五虎',
-            }, {
-              person: '张三',
-              name: '王六虎',
-            }, {
-              person: '张三',
-              name: '王七虎',
-            }],
+            tableData3: [],
             multipleSelection: []
         }
     },
+    created(){
+      
+      this.getClient()
+      this.getTeamList()
+    },
     methods: {
+        staff_id(id){
+          this.sub_use_id = id
+          console.log(this.value)
+          console.log(id)
+        },
+        //更改客户的跟进人员
+        changeClientFollow(){
+          var _this = this
+          $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "http://192.168.2.124/salestest/customer/SysUodateCustoerUser" ,//url
+            data: {user_id:this.$store.state.userId,team_id:this.$store.state.teamId,use_id:this.sub_use_id,customer_id:this.client_id},
+            success: function (res) {
+              if(res.recode!=400){
+                _this.$message.warning(res.reinfo)
+              }else{
+                _this.dialogVisibleClientInfo = false
+                _this.reload()
+                console.log(res)
+              }
+            },
+          });
+        },
+        //查询某员工下的客户
+        searchStaffClient(){
+          this.getClient()
+        },
+        //获取团队成员
+        getTeamList(){
+          var _this = this
+          $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "http://192.168.2.124/salestest/customer/SysGetTeamUser" ,//url
+            data: {user_id:this.$store.state.userId,team_id:this.$store.state.teamId},
+            success: function (res) {
+              if(res.recode!=400){
+                _this.$message.warning(res.reinfo)
+              }else{
+                _this.clientInfo = res.data
+                _this.form.staffList = res.data
+                console.log(res)
+              }
+            },
+          });
+        },
+        //管理员查看公司客户
+        getClient(){
+          var _this = this
+          $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "http://192.168.2.124/salestest/customer/SysAdminGetCustomer" ,//url
+            data: {user_id:this.$store.state.userId,team_id:this.$store.state.teamId,use_id:this.use_id},
+            success: function (res) {
+              if(res.recode!=400){
+                _this.$message.warning(res.reinfo)
+              }else{
+                _this.tableData3 = res.data
+                console.log(res)
+              }
+            },
+          });
+        },
         handleSearch(){
             this.dialogVisibleClientInfo = true
         },
@@ -100,6 +155,12 @@ export default {
         },
         handleSelectionChange(val) {
           this.multipleSelection = val;
+          console.log(val)
+          console.log(this.multipleSelection)
+          for(var i = 0;i<this.multipleSelection.length;i++){
+            this.client_id.push(this.multipleSelection[i].id)
+          }
+          console.log(this.client_id)
         }
     }
 }

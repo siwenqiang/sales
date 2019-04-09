@@ -21,12 +21,12 @@
             stripe
             style="width: 100%">
             <el-table-column
-              prop="name"
+              prop="cust_name"
               label="姓名"
             >
             </el-table-column>
             <el-table-column
-              prop="tel"
+              prop="mobile"
               label="手机号">
             </el-table-column>
             <el-table-column
@@ -43,27 +43,28 @@
             :visible.sync="dialogVisible"
             size="tiny">
             <el-form :model="form" :rules="rules" ref='form'>
-                <el-form-item label="姓名">
+                <el-form-item label="客户名称">
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>
                 <el-form-item
-                    label="个人联系方式"
-                    prop="personPhone"
-                >
-                    <el-input v-model.number="form.personPhone"></el-input>
+                    label="手机号"
+                    prop="phone">
+                    <el-input v-model.number="form.phone"></el-input>
                 </el-form-item>
-                 <el-form-item label="公司名称">
-                    <el-input v-model="form.companyName"></el-input>
+                 <el-form-item label="客户级别" class="staffClient_level">
+                    <el-select v-model="form.client_level" placeholder="请选择客户级别">
+                         <el-option v-for="(v,i) in clientLevel" :key="i" :label="v.level_name" :value="v.id"></el-option>
+                    </el-select>
                 </el-form-item>
-                <el-form-item label="公司地址">
+                <el-form-item label="客户地址">
                     <el-input v-model="form.address"></el-input>
                 </el-form-item>
                 <!-- 校验电话必须为数字 -->
                 <el-form-item
-                    label="公司联系方式"
-                    prop="companyPhone"
+                    label="其他联系方式"
+                    prop="otherTel"
                     >
-                    <el-input v-model.number="form.companyPhone"></el-input>
+                    <el-input v-model="form.otherTel"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="addClient('form')">提交</el-button>
@@ -122,35 +123,15 @@ export default {
         }
       };
       return {
-        tableData: [{
-            name:'张三',
-            position:'北京众要机械科技有限公司-技术部',
-            tel:18588888888,
-            email:'553785985@qq.com'
-        }, {
-            name:'李四',
-            position:'北京众要机械科技有限公司-销售部',
-            tel:18588888888,
-            email:'553785985@qq.com'                     
-        }, {
-            name:'王五',
-            position:'北京众要机械科技有限公司-人事部',
-            tel:18588888888,
-            email:'553785985@qq.com'                                              
-        }, {
-            name:'马六',
-            position:'北京众要机械科技有限公司-财务部',
-            tel:18588888888,
-            email:'553785985@qq.com'                                            
-        }],
+        clientLevel:[],
+        tableData: [],
         dialogVisible:false,
         dialogVisibleCheck:false,
         form:{
             name:'',
-            personPhone:'',
-            companyPhone:'',
-            position:'',
-            companyName:'',
+            phone:'',
+            otherTel:'',
+            client_level:'',
             address:''
         },
         formCheck:{
@@ -173,7 +154,49 @@ export default {
         },
       }
     },
+    created(){
+        this.getClientList()
+        this.getClientLevel()
+    },
     methods:{
+        //获取客户等级
+        getClientLevel(){
+            var _this = this
+            $.ajax({
+              //几个参数需要注意一下
+              type: "POST",//方法类型
+              dataType: "json",//预期服务器返回的数据类型
+              url: "http://192.168.2.124/salestest/customer/SysGetCustomerType" ,//url
+              data: {},
+              success: function (res) {
+                if(res.recode!=400){
+                  _this.$message.warning(res.reinfo)
+                }else{
+                    _this.clientLevel = res.data
+                    console.log(res)
+                }
+              },
+            });
+        },
+        //获取客户列表
+        getClientList(){
+            var _this = this
+            $.ajax({
+              //几个参数需要注意一下
+              type: "POST",//方法类型
+              dataType: "json",//预期服务器返回的数据类型
+              url: "http://192.168.2.124/salestest/customer/SysGetCustomerList" ,//url
+              data: {user_id:this.$store.state.userId,team_id:this.$store.state.teamId},
+              success: function (res) {
+                if(res.recode!=400){
+                  _this.$message.warning(res.reinfo)
+                }else{
+                    _this.tableData = res.data
+                    console.log(res)
+                }
+              },
+            });
+        },
         //每页显示条数改变时
         handleSizeChange(){
 
@@ -184,13 +207,24 @@ export default {
         },
         //点击提交需向后端发起请求
         addClient(formName){
-            this.$refs[formName].validate((valid) => {
-                if (valid) {
-                   this.dialogVisible = false
-                } else {
-                  return false;
-
+             var _this = this
+            $.ajax({
+              //几个参数需要注意一下
+              type: "POST",//方法类型
+              dataType: "json",//预期服务器返回的数据类型
+              url: "http://192.168.2.124/salestest/customer/SysInCustomer" ,//url
+              data: {user_id:this.$store.state.userId,team_id:this.$store.state.teamId,cust_name:this.form.name,mobile:this.form.phone,level_id:this.form.client_level,address:this.form.address,other_mobile:this.form.otherTel},
+              success: function (res) {
+                if(res.recode!=400){
+                  _this.$message.warning(res.reinfo)
+                }else{
+                    _this.getClientList()
+                    _this.$message.success('客户添加成功')
+                    _this.dialogVisible = false
+                    _this.form = {}
+                    console.log(res)
                 }
+              },
             });
         },
         //点击查看客户详情
@@ -215,6 +249,8 @@ export default {
 </script>
 
 <style>
-
+.staffClient_level .el-form-item__label{
+    float:none
+}
 </style>
 
